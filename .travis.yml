@@ -1,0 +1,43 @@
+dist: bionic
+notifications:
+  email: on_failure
+
+language: python
+python:
+  - 3.7
+  - 3.8
+
+install: pip install .[test]
+script: pytest -v --doctest-modules --pyargs rhg_pulumi_resources
+
+jobs:
+  include:
+    - stage: test
+      name: 'Package'
+      install:
+        - pip install twine
+        - python setup.py bdist_wheel sdist
+      script: twine check dist/*
+    - name: 'Code format'
+      install: pip install .[dev]
+      script:
+        - flake8
+        - black -v --check rhg_pulumi_resources/*
+    - name: 'Documentation'
+      install: pip install .[doc]
+      script: sphinx-build -W -b html -d docs/_build/doctrees docs/. docs/_build/html
+
+    - stage: deploy
+      name: 'PyPI'
+      install: skip
+      script: skip
+      deploy:
+        on:
+          tags: true
+          branch: master
+        provider: pypi
+        distributions: sdist bdist_wheel
+        user: __token__
+        password:
+          secure: boKPPgLHYEgBMul1+9dIm9F2PEp1knsSHhBPTAJbd7fNZ1l+CMEIZTGg0FUi1ceLyfWZ0gtWGJHMH8cB2AktLH5jB2pebXI0mOXIv2igitQ4M+UIG4AZEeMMvi3B5kPdHDDj04q0tpk+JdsVCWhir2SyUVpBEI5id4LvqJJpnvcP3wNWZzsWEpid38Hq7NR43i50LzNu+S2pS3S0VxUcoQNL5wIi5UjYe8HlLyPe3JtpCkmAj2pGlg0IGX41r4giK2l920QtoraTY2Q+7h/IuKjm+XQSsIZOyGMG75Q/NvIeQssmAjmEDH8Tj/SW1j8XqLYZ4ixNMrN6kAeWPgBkpe+2muF+AjHfw8zdIP1hZuCaCI2jfS0Mc0z3ibC/iaXYFA7wzKPiJ5CJ6ekoD0HHAo3J6iKhQzWz40gMa6YzZIvMyojvP6Y44MVy0SLD+1Fx/cEJ+pm/lhqtpwqaEz7vDqSNyfXQ8As+4eyGTOo/7MjUm/OJAHR72+2T8MbMxsfDytW67VFeDsWqaMa0PkuiWAb6B0BWcPKn1XLMNmFwGYl1ZyFoMpJki01Wa+EU1h4C+Uz/aye0erYAw4VPQI29V34JPtObOmGzkLP7uZD0n/Rajv3lqkd0k4EuUpH/w78ga24zVb2LUjV7iIc9fC0IeTNDQqc4gRP9ZNT/SG9gvuQ=
+        skip_existing: true
