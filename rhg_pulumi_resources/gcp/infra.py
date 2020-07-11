@@ -195,17 +195,6 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         )
 
 
-def _generate_ksa_gsa_binding_member_name(gcp_sa, k8s_sa):
-    """Create str member name needed for IAMMember binding k8s and GCP service accounts
-
-    This is needed for GCP's Workload Identity feature. Written based on
-    https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity.
-    """
-    return pulumi.Output.all(
-        gcp_sa.project, k8s_sa.metadata["namespace"], k8s_sa.metadata["name"]
-    ).apply(lambda x: "serviceAccount:{}.svc.id.goog[{}/{}]".format(*x))
-
-
 class WorkloadIdentity(pulumi.ComponentResource):
     def __init__(
         self,
@@ -269,8 +258,10 @@ class WorkloadIdentity(pulumi.ComponentResource):
         )
 
         # IAM to bind KSA and GSA fastimpact SAs
-        ksa_gsa_binding_member = _generate_ksa_gsa_binding_member_name(
-            self.gcp_serviceaccount, self.k8s_serviceaccount
+        ksa_gsa_binding_member = pulumi.Output.all(
+            self.gcp_serviceaccount.project, self.k8s_serviceaccount.metadata
+        ).apply(
+            lambda x: f"serviceAccount:{x[0]}.svc.id.goog[{x[1].get('namespace')}/{x[1].get('name')}]"
         )
 
         sa_full_id = pulumi.Output.all(
