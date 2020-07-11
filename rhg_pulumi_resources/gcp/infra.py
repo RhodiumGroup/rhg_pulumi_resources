@@ -38,6 +38,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         machinetype_core="n1-standard-2",
         machinetype_worker="n1-highmem-8",
         min_cluster_version=None,
+        release_channel=None,
         oauthscopes=None,
         enable_servicemesh=False,
         opts=None,
@@ -59,6 +60,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         min_cluster_version : str or None, optional
             Minimum Kubernetes version for the master node. If ``None``, uses the
             default version on GKE.
+        release_channel : dict or None, optional
+            Passed to pulumi_gcp.container.Cluster.
         oauthscopes : Sequence of str or None, optional
             OAuth scopes for node pools. If ``None``, uses default scopes as defined
             https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--scopes.
@@ -104,6 +107,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                 "env": pulumi.get_stack(),
                 "pulumi-project": pulumi.get_project(),
             },
+            release_channel=release_channel,
             initial_node_count=1,
             remove_default_node_pool=True,
             workload_identity_config={
