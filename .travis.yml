@@ -23,9 +23,9 @@ jobs:
       script:
         - flake8
         - black -v --check rhg_pulumi_resources/*
-    - name: 'Documentation'
-      install: pip install .[doc]
-      script: sphinx-build -W -b html -d docs/_build/doctrees docs/. docs/_build/html
+#    - name: 'Documentation'
+#      install: pip install .[doc]
+#      script: sphinx-build -W -b html -d docs/_build/doctrees docs/. docs/_build/html
 
     - stage: deploy
       name: 'PyPI'
