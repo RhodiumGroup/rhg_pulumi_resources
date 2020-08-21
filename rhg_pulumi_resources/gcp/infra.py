@@ -220,9 +220,9 @@ class WorkloadIdentity(pulumi.ComponentResource):
 
         Attributes
         ----------
-        gcp_serviceaccount : pulumi_gcp.service_account.Account
+        gcp_serviceaccount : pulumi_gcp.serviceaccount.Account
         k8s_serviceaccount : pulumi_kubernetes.core.v1.ServiceAccount
-        sa_binding_iammember : pulumi_gcp.service_account.IAMMember
+        sa_binding_iammember : pulumi_gcp.serviceaccount.IAMMember
         """
         resource_type = pulumi_type_name(
             self.__class__.__name__, TYPE_PACKAGE_NAME, index=TYPE_INDEX_NAME
@@ -232,7 +232,7 @@ class WorkloadIdentity(pulumi.ComponentResource):
         if gcp_display_name is None:
             gcp_display_name = gcp_account_id
 
-        self.gcp_serviceaccount = gcp.service_account.Account(
+        self.gcp_serviceaccount = gcp.serviceaccount.Account(
             f"{resource_name}-gcp-serviceaccount",
             account_id=gcp_account_id,
             display_name=gcp_display_name,
@@ -268,7 +268,7 @@ class WorkloadIdentity(pulumi.ComponentResource):
             self.gcp_serviceaccount.project, self.gcp_serviceaccount.email
         ).apply(lambda x: "projects/{}/serviceAccounts/{}".format(*x))
 
-        self.sa_binding_iammember = gcp.service_account.IAMMember(
+        self.sa_binding_iammember = gcp.serviceaccount.IAMMember(
             f"{resource_name}-sa-binding-iammember",
             service_account_id=sa_full_id,
             member=ksa_gsa_binding_member,
