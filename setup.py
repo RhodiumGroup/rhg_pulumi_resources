@@ -9,7 +9,7 @@ with open("HISTORY.rst") as history_file:
 
 setup(
     name="rhg_pulumi_resources",
-    version="0.1.0a0",
+    use_scm_version=True,
     description="Pulumi resource components and utilities for teaching and research at RHG",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
@@ -19,7 +19,12 @@ setup(
     packages=find_packages(),
     python_requires=">=3.7",
     include_package_data=True,
-    install_requires=["pulumi>=2.0.0,<3.0.0", "pulumi-gcp>=3.0.0,<4.0.0", "pulumi-kubernetes>=1.0.0"],
+    setup_requires=["setuptools_scm"],
+    install_requires=[
+        "pulumi>=2.0.0,<3.0.0",
+        "pulumi-gcp>=3.19.0,<4.0.0",
+        "pulumi-kubernetes>=1.0.0",
+    ],
     zip_safe=False,
     keywords="pulumi",
     classifiers=[
