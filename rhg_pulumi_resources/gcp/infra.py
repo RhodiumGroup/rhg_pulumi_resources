@@ -37,6 +37,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         resource_name,
         machinetype_core="n1-standard-2",
         machinetype_worker="n1-highmem-8",
+        disk_size_gb_core=10.0,
+        disk_size_gb_worker=10.0,
+        disktype_core="pd-ssd",
+        disktype_worker="pd-ssd",
         min_cluster_version=None,
         release_channel=None,
         oauthscopes=None,
@@ -57,6 +61,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         resource_name : str
         machinetype_core : str, optional
         machinetype_worker : str, optional
+        disk_size_gb_core : float, optional
+        disk_size_gb_worker : float, optional
+        disktype_core : str, optional
+        disktype_worker : str, optional
         min_cluster_version : str or None, optional
             Minimum Kubernetes version for the master node. If ``None``, uses the
             default version on GKE.
@@ -131,7 +139,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
-                "disk_size_gb": 10,
+                "disk_size_gb": disk_size_gb_core,
+                "diskType": disktype_core,
                 "machine_type": machinetype_core,
                 "oauthScopes": oauthscopes,
                 # Below needed to prevent nodedpool from always replacing on deploy.
@@ -147,8 +156,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
-                "disk_size_gb": 10,
-                "diskType": "pd-ssd",
+                "disk_size_gb": disk_size_gb_worker,
+                "diskType": disktype_worker,
                 "labels": {
                     "preemptible": "true",
                     "dedicated": "worker",
@@ -175,8 +184,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
-                "disk_size_gb": 10,
-                "diskType": "pd-ssd",
+                "disk_size_gb": disk_size_gb_worker,
+                "diskType": disktype_worker,
                 "labels": {
                     "dedicated": "worker",
                     "env": pulumi.get_stack(),
