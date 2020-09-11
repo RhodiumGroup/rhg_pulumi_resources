@@ -18,7 +18,7 @@ Pulumi resource components and utilities for teaching and research at RHG.
 
 This code is under heavy development.
 
-* Documentation: https://rhg_pulumi_resources.readthedocs.io.
+* Documentation: https://rhg_pulumi_resources.readthedocs.io (Under construction. Not yet public.)
 * Free software: Apache License 2.0
 
 Features
@@ -31,5 +31,5 @@ Installation
 
 To install with ``pip``::
 
-    pip install rhg_pulumi_resources
+    pip install git+https://github.com/RhodiumGroup/rhg_pulumi_resources
 
