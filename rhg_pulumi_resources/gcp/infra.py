@@ -55,10 +55,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
 
         Cluster includes GKE istio and default configuration for GKE Workload Identity.
 
-        There are three node pools. a default "core" and two worker pools. Both worker
-        pools have the ``NO_SCHEDULE`` taint ``dedicated=worker``. One of the worker
-        pools is preemptible. This preemptible worker pool also has a
-        ``NO_SCHEDULE`` taint ``preemptible=true``.
+        There are two node pools: a default "core" and one worker pool. The
+        worker node pool is preemptible. The worker node pool also has two
+        taints ``NO_SCHEDULE`` taint ``dedicated=worker`` and a ``NO_SCHEDULE``
+        ``preemptible=true`` taint.
 
         Parameters
         ----------
@@ -90,7 +90,6 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         cluster : pulumi_gcp.container.Cluster
         nodepool_core : pulumi_gcp.container.NodePool
         nodepool_worker : pulumi_gcp.container.NodePool
-        nodepool_worker_nonpreemptible : pulumi_gcp.container.NodePool
         """
         resource_type = pulumi_type_name(
             self.__class__.__name__, TYPE_PACKAGE_NAME, index=TYPE_INDEX_NAME
@@ -184,35 +183,6 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                 "taints": [
                     {"key": "dedicated", "value": "worker", "effect": "NO_SCHEDULE"},
                     {"key": "preemptible", "value": "true", "effect": "NO_SCHEDULE"},
-                ],
-                # Below needed to prevent nodedpool from always replacing on deploy.
-                "workloadMetadataConfig": {"nodeMetadata": "GKE_METADATA_SERVER"},
-            },
-            opts=pulumi.ResourceOptions(parent=self),
-        )
-
-        self.nodepool_worker_nonpreemptible = gcp.container.NodePool(
-            "nodepool-worker-nonpreemptible",
-            cluster=self.cluster.name,
-            autoscaling={
-                "maxNodeCount": maxnodecount_worker,
-                "minNodeCount": minnodecount_worker,
-            },
-            initial_node_count=1,
-            management={"autoRepair": True, "autoUpgrade": True},
-            node_config={
-                "disk_size_gb": disk_size_gb_worker,
-                "diskType": disktype_worker,
-                "labels": {
-                    "dedicated": "worker",
-                    "env": pulumi.get_stack(),
-                    "pulumi-project": pulumi.get_project(),
-                },
-                "machine_type": machinetype_worker,
-                "oauthScopes": oauthscopes,
-                "preemptible": False,
-                "taints": [
-                    {"key": "dedicated", "value": "worker", "effect": "NO_SCHEDULE"}
                 ],
                 # Below needed to prevent nodedpool from always replacing on deploy.
                 "workloadMetadataConfig": {"nodeMetadata": "GKE_METADATA_SERVER"},
