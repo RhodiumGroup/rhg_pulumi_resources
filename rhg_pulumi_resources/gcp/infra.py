@@ -191,7 +191,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                 "oauthScopes": oauthscopes,
                 "preemptible": bool(preemptible_worker),
                 "taints": [
-                    {"key": "dedicated", "value": "worker", "effect": "NO_SCHEDULE"},
+                    {"key": "dedicated", "value": "worker", "effect": "NO_SCHEDULE"}
                 ],
                 # Below needed to prevent nodedpool from always replacing on deploy.
                 "workloadMetadataConfig": {"nodeMetadata": "GKE_METADATA_SERVER"},
