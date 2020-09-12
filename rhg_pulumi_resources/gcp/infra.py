@@ -35,6 +35,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
     def __init__(
         self,
         resource_name,
+        *,
         machinetype_core="n1-standard-2",
         machinetype_worker="n1-highmem-8",
         disk_size_gb_core=100.0,
