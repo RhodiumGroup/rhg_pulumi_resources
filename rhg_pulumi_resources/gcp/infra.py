@@ -44,6 +44,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         disktype_worker="pd-ssd",
         nodecountminmax_core=(0, 10),
         nodecountminmax_worker=(0, 50),
+        preemptible_core=False,
+        preemptible_worker=True,
         min_cluster_version=None,
         release_channel=None,
         oauthscopes=None,
@@ -70,6 +72,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         disktype_worker : str, optional
         nodecountminmax_core : Sequence[int], optional
         nodecountminmax_worker : Sequence[int], optional
+        preemptible_core : bool, optional
+        preemptible_worker : bool, optional
         min_cluster_version : str or None, optional
             Minimum Kubernetes version for the master node. If ``None``, uses the
             default version on GKE.
@@ -104,6 +108,14 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                 "https://www.googleapis.com/auth/trace.append",
             ]
 
+        common_resource_labels = {
+            "managed-by": "pulumi",
+            "env": pulumi.get_stack(),
+            "pulumi-project": pulumi.get_project(),
+        }
+
+        core_resource_labels = common_resource_labels.copy()
+
         self.cluster = gcp.container.Cluster(
             resource_name,
             min_master_version=min_cluster_version,
@@ -114,11 +126,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                     "recurrence": "FREQ=WEEKLY",
                 }
             },
-            resource_labels={
-                "managed-by": "pulumi",
-                "env": pulumi.get_stack(),
-                "pulumi-project": pulumi.get_project(),
-            },
+            resource_labels=core_resource_labels,
             release_channel=release_channel,
             initial_node_count=1,
             remove_default_node_pool=True,
@@ -136,6 +144,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
+        core_resource_labels = common_resource_labels.copy()
+        if preemptible_core:
+            core_resource_labels["preemptible"] = str(preemptible_core).lower()
+
         self.nodepool_core = gcp.container.NodePool(
             "nodepool-core",
             cluster=self.cluster.name,
@@ -149,12 +161,18 @@ class WorkerPoolCluster(pulumi.ComponentResource):
                 "disk_size_gb": disk_size_gb_core,
                 "diskType": disktype_core,
                 "machine_type": machinetype_core,
+                "labels": core_resource_labels,
                 "oauthScopes": oauthscopes,
-                # Below needed to prevent nodedpool from always replacing on deploy.
+                "preemptible": bool(preemptible_core),
                 "workloadMetadataConfig": {"nodeMetadata": "GKE_METADATA_SERVER"},
             },
             opts=pulumi.ResourceOptions(parent=self),
         )
+
+        worker_resource_labels = common_resource_labels.copy()
+        worker_resource_labels["dedicated"] = "worker"
+        if preemptible_worker:
+            worker_resource_labels["preemptible"] = str(preemptible_worker).lower()
 
         self.nodepool_worker = gcp.container.NodePool(
             "nodepool-worker",
@@ -168,18 +186,12 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             node_config={
                 "disk_size_gb": disk_size_gb_worker,
                 "diskType": disktype_worker,
-                "labels": {
-                    "preemptible": "true",
-                    "dedicated": "worker",
-                    "env": pulumi.get_stack(),
-                    "pulumi-project": pulumi.get_project(),
-                },
+                "labels": worker_resource_labels,
                 "machine_type": machinetype_worker,
                 "oauthScopes": oauthscopes,
-                "preemptible": True,
+                "preemptible": bool(preemptible_worker),
                 "taints": [
                     {"key": "dedicated", "value": "worker", "effect": "NO_SCHEDULE"},
-                    {"key": "preemptible", "value": "true", "effect": "NO_SCHEDULE"},
                 ],
                 # Below needed to prevent nodedpool from always replacing on deploy.
                 "workloadMetadataConfig": {"nodeMetadata": "GKE_METADATA_SERVER"},
