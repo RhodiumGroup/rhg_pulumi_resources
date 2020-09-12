@@ -41,6 +41,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         disk_size_gb_worker=10.0,
         disktype_core="pd-ssd",
         disktype_worker="pd-ssd",
+        minnodecount_core=0,
+        maxnodecount_core=10,
+        minnodecount_worker=0,
+        maxnodecount_worker=50,
         min_cluster_version=None,
         release_channel=None,
         oauthscopes=None,
@@ -65,6 +69,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         disk_size_gb_worker : float, optional
         disktype_core : str, optional
         disktype_worker : str, optional
+        minnodecount_core : int, optional
+        maxnodecount_core : int, optional
+        minnodecount_worker : int, optional
+        maxnodecount_worker : int, optional
         min_cluster_version : str or None, optional
             Minimum Kubernetes version for the master node. If ``None``, uses the
             default version on GKE.
@@ -135,7 +143,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         self.nodepool_core = gcp.container.NodePool(
             "nodepool-core",
             cluster=self.cluster.name,
-            autoscaling={"maxNodeCount": 100, "minNodeCount": 0},
+            autoscaling={
+                "maxNodeCount": maxnodecount_core,
+                "minNodeCount": minnodecount_core,
+            },
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
@@ -152,7 +163,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         self.nodepool_worker = gcp.container.NodePool(
             "nodepool-worker",
             cluster=self.cluster.name,
-            autoscaling={"maxNodeCount": 2000, "minNodeCount": 0},
+            autoscaling={
+                "maxNodeCount": maxnodecount_worker,
+                "minNodeCount": minnodecount_worker,
+            },
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
@@ -180,7 +194,10 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         self.nodepool_worker_nonpreemptible = gcp.container.NodePool(
             "nodepool-worker-nonpreemptible",
             cluster=self.cluster.name,
-            autoscaling={"maxNodeCount": 500, "minNodeCount": 0},
+            autoscaling={
+                "maxNodeCount": maxnodecount_worker,
+                "minNodeCount": minnodecount_worker,
+            },
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
