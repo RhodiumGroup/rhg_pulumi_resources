@@ -138,7 +138,6 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             addons_config={
                 "istioConfig": {
                     "disabled": not enable_servicemesh,
-                    "auth": "AUTH_MUTUAL_TLS",
                 }
             },
             opts=pulumi.ResourceOptions(parent=self),
