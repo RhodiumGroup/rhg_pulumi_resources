@@ -60,6 +60,6 @@ class ArgoWorkflow(pulumi.ComponentResource):
         # Directly install the latest argo-workflow manifests
         self.configfile = ConfigFile(
             name=f"{resource_name}-configfile",
-            file_id=f"https://raw.githubusercontent.com/argoproj/argo/{argo_version}/manifests/install.yaml",
+            file_id=f"https://raw.githubusercontent.com/argoproj/argo-workflows/{argo_version}/manifests/install.yaml",
             opts=pulumi.ResourceOptions(provider=k8s_provider, parent=self),
         )
