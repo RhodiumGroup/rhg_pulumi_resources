@@ -46,6 +46,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         nodecountminmax_worker=(0, 10),
         preemptible_core=False,
         preemptible_worker=True,
+        image_type=None,
         min_cluster_version=None,
         release_channel=None,
         oauthscopes=None,
@@ -74,6 +75,8 @@ class WorkerPoolCluster(pulumi.ComponentResource):
         nodecountminmax_worker : Sequence[int], optional
         preemptible_core : bool, optional
         preemptible_worker : bool, optional
+        image_type : str, optional
+            Core and worker node image type.
         min_cluster_version : str or None, optional
             Minimum Kubernetes version for the master node. If ``None``, uses the
             default version on GKE.
@@ -157,6 +160,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
+                "image_type": image_type,
                 "disk_size_gb": disk_size_gb_core,
                 "diskType": disktype_core,
                 "machine_type": machinetype_core,
@@ -183,6 +187,7 @@ class WorkerPoolCluster(pulumi.ComponentResource):
             initial_node_count=1,
             management={"autoRepair": True, "autoUpgrade": True},
             node_config={
+                "image_type": image_type,
                 "disk_size_gb": disk_size_gb_worker,
                 "diskType": disktype_worker,
                 "labels": worker_resource_labels,
